@@ -8,6 +8,41 @@ AK60-6 네 바퀴 로봇의 **전진/후진 주행** 코드.
 > 같은 바퀴 배치를 OpenCR + DYNAMIXEL로 바퀴마다 키보드로 구동하는 코드(ROS 2 아님,
 > PC에서 USB로 OpenCR 직접 연결)는 [`opencr_dxl_jog/`](opencr_dxl_jog/README.md) 참고.
 
+## Quick Start
+
+### A. AK60 전진/후진 주행 (ROS 2, CAN)
+
+`straight_drive_node.py` 는 `ak60_driver` 패키지가 있는 워크스페이스 안에 두어야 한다
+(아래 [ROS 2 노드로 주행](#ros-2-노드로-주행) 참고).
+
+```bash
+~/can_check.sh can1 1000000          # CAN 버스 기동 (터미널 열 때마다)
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+
+ros2 run ak60_driver straight_drive_node
+```
+
+`W` 전진 · `S` 후진 · `SPACE`/`X` 정지 · `+`/`-` 속도 · `Q` 종료
+
+### B. OpenCR + DYNAMIXEL 바퀴별 키보드 구동 (ROS 2 아님, USB)
+
+최초 설치·업로드는 [`opencr_dxl_jog/README.md`](opencr_dxl_jog/README.md) 의 Quick Start 참고.
+
+```bash
+cd opencr_dxl_jog
+python3 jog_each.py --scan           # ID 1~4 응답 확인
+python3 key_jog.py                   # 키보드 구동
+```
+
+`q/a` ID1 · `w/s` ID2 · `e/d` ID3 · `r/f` ID4 · `space` 정지 · `h` 원점 · `b` 과부하 복구 · `x` 종료
+
+### 기구학 테스트 (로봇 없이)
+
+```bash
+PYTHONPATH=. python3 -m pytest tests/ -q
+```
+
 ## 바퀴 배치
 
 ```

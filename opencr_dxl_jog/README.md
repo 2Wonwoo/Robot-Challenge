@@ -8,6 +8,42 @@ Linux PC에서 USB로 OpenCR에 직접 연결한다. ROS 2는 쓰지 않고, Ard
 Linux PC (USB) ---- OpenCR ---- DXL 버스(57600bps) ---- DYNAMIXEL ID 1~4
 ```
 
+## Quick Start
+
+**0. 최초 1회** — 도구 설치는 아래 [준비](#준비-최초-1회) 참고 (arduino-cli, OpenCR 코어,
+Dynamixel2Arduino, i386 라이브러리, pyserial).
+
+**1. 연결 확인** — `ROBOTIS_OpenCR` 이 가리키는 ttyACM 이 OpenCR 포트다
+
+```bash
+ls -l /dev/serial/by-id/ | grep OpenCR      # 예: ... -> ../../ttyACM1
+```
+
+**2. 펌웨어 업로드** — 최초 1회, 또는 `dxl_bridge.ino` 를 바꿨을 때만
+
+```bash
+cd opencr_dxl_jog
+export PATH="$HOME/.local/bin:$PATH"
+arduino-cli compile --fqbn OpenCR:OpenCR:OpenCR dxl_bridge
+arduino-cli upload -p /dev/ttyACM1 --fqbn OpenCR:OpenCR:OpenCR dxl_bridge
+```
+
+**3. 모터 확인 → 구동** — 바퀴를 띄운 상태에서 먼저 해볼 것
+
+```bash
+python3 jog_each.py --scan          # ID 1~4 / 57600 / MODEL 1020 이 나와야 정상
+python3 key_jog.py                  # 키보드 구동 (포트가 다르면 --port /dev/ttyACMx)
+```
+
+`q/a` ID1 · `w/s` ID2 · `e/d` ID3 · `r/f` ID4 · `space` 정지 · `h` 원점 · `b` 과부하 복구 · `x` 종료
+
+| 증상 | 조치 |
+|---|---|
+| 스캔에서 모터가 안 나옴 | 모터 전원(12V)·배선 확인, 펌웨어 업로드 여부 확인 |
+| 바퀴가 힘없이 안 돈다 | `--p`/`--i` 를 올린다 ([토크](#토크가-약하면-게인-문제다)) |
+| 돌다가 토크가 꺼진다 | 과부하 보호. `b` 로 복구 ([과부하](#오래-막히면-과부하로-토크가-꺼진다-hardware-error-32)) |
+| 업로드가 `0xF020` 으로 실패 | SW2 누른 채 Reset → 떼고 SW2 1~2초 더 누른 뒤 재시도 |
+
 ## 바퀴 배치
 
 ```
